@@ -52,6 +52,8 @@ class DatabaseSeeder extends Seeder
         $this->call(CategoriesTableSeeder::class);
         $this->call([ArticlesTableSeeder::class]);
         $this->call(UserJobSeeder::class);
+        $this->call(PermissionSeeder::class);
+        $this->call(RoleSeeder::class);
 
         UserSubscription::factory()->create();
 

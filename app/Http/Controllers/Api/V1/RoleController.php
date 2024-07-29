@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
 use App\Models\User;
 use App\Models\Organisation;
 use App\Models\Role;
@@ -107,35 +109,17 @@ class RoleController extends Controller
         }
     }
 
-    public function update(UpdateRoleRequest $request)
+    public function update(UpdateRoleRequest $request, $org_id, $role_id)
     {
-        try {
-            DB::beginTransaction();
-
-            // creating the role 
-            $role = Role::create([
-                'name' => $request->role_name,
-                'org_id' => $request->organisation_id,
-            ]);
-
-            $role->permissions()->attach($request->permissions_id);
-            DB::commit();
-
-            $code = Response::HTTP_CREATED;
-
-            return response()->json([
-                'message' => "Role created successfully",
-                'status_code' => $code,
-            ], $code);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Role creation error: ' . $e->getMessage());
-            $code = Response::HTTP_BAD_REQUEST;
-            return response()->json([
-                'message' => "Role creation failed - ".$e->getMessage(),
-                'status_code' => $code,
-            ], $code);
-        }
+        $user = auth('api')->user();
+        if(!$user) return ResponseHelper::response("Authentication failed", 401, null);
+        if($organisation = Organisation::find($org_id)){
+          if(!$organisation->users->contains($user->id)) return ResponseHelper::response("You are not authorised to perform this action", 401, null);
+          if($role = Role::find($role_id)){
+              $role->update($request->only('name', 'description'));
+              return ResponseHelper::response("Role updated successfully", 200, null);
+          } else return ResponseHelper::response("Role not found", 404, null);
+        } else return ResponseHelper::response("Organisation not found", 404, null);
     }
 }
 

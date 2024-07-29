@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Helpers\ResponseHelper;
 
 class UpdateRoleRequest extends FormRequest
 {
@@ -23,13 +25,16 @@ class UpdateRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255'
-            ],
-            'description' => 'string',
+            'name' => "required|string|max:255",
+            'description' => "string",
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            ResponseHelper::validationError($validator->errors())
+        );
     }
 
 }
