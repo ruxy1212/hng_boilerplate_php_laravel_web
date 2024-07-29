@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Organisation;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Permission;
@@ -18,10 +19,10 @@ class RoleSeeder extends Seeder
           ["Project Lead", "Manage, coordinate, oversee"],
           ["Administrator", "Full access, control"]
         ];
-
+        $organisation = Organisation::factory()->create();
         foreach ($roles as $role) {
-            $permission = Permission::firstOrCreate(['name' => $role[0], 'description' => $role[1]]);
-            Role::getRandom()->permissions()->attach($permission->id);
+            $role = Role::firstOrCreate(['name' => $role[0], 'description' => $role[1], 'org_id' => $organisation->org_id]);
+            Permission::inRandomOrder()->first()->roles()->attach($role->id);
         }
     }
 }
