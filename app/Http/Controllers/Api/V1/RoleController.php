@@ -106,6 +106,37 @@ class RoleController extends Controller
             ], 400);
         }
     }
+
+    public function update(UpdateRoleRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // creating the role 
+            $role = Role::create([
+                'name' => $request->role_name,
+                'org_id' => $request->organisation_id,
+            ]);
+
+            $role->permissions()->attach($request->permissions_id);
+            DB::commit();
+
+            $code = Response::HTTP_CREATED;
+
+            return response()->json([
+                'message' => "Role created successfully",
+                'status_code' => $code,
+            ], $code);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Role creation error: ' . $e->getMessage());
+            $code = Response::HTTP_BAD_REQUEST;
+            return response()->json([
+                'message' => "Role creation failed - ".$e->getMessage(),
+                'status_code' => $code,
+            ], $code);
+        }
+    }
 }
 
 ?>
