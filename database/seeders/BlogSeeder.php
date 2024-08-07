@@ -12,7 +12,7 @@ class BlogSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('blogs')->truncate();
+        // DB::table('blogs')->truncate();
 
         $categories = ['Business', 'Food', 'Lifestyle', 'World News'];
         $images = [
